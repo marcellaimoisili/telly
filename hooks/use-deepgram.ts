@@ -127,11 +127,11 @@ export function useDeepgram({ onStableTranscript }: UseDeepgramOptions = {}) {
             : segmentText
           setTranscript(full)
 
-          // Debounce interims 250ms before triggering match
+          // Debounce interims 150ms before triggering match
           if (debounceRef.current) clearTimeout(debounceRef.current)
           debounceRef.current = setTimeout(() => {
             callbackRef.current?.(full)
-          }, 250)
+          }, 150)
         }
       }
 

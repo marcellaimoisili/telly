@@ -19,6 +19,52 @@ export function cosineSimilarity(a: number[], b: number[]): number {
   return dot / denom
 }
 
+/**
+ * Fast local word overlap between spoken text and an anchor.
+ * Returns the fraction of anchor words found in the spoken text (0-1).
+ */
+export function wordOverlap(spoken: string, anchor: string): number {
+  const spokenWords = new Set(
+    spoken.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/).filter(Boolean)
+  )
+  const anchorWords = anchor
+    .toLowerCase()
+    .replace(/[^\w\s]/g, "")
+    .split(/\s+/)
+    .filter(Boolean)
+
+  if (anchorWords.length === 0) return 0
+
+  let hits = 0
+  for (const w of anchorWords) {
+    if (spokenWords.has(w)) hits++
+  }
+
+  return hits / anchorWords.length
+}
+
+/**
+ * Fast-path matcher: checks word overlap against anchors in a forward window.
+ * Returns the index of the first anchor with overlap >= threshold, or -1.
+ */
+export function localMatch(
+  spokenText: string,
+  anchors: string[],
+  windowStart: number,
+  windowSize = 5,
+  threshold = 0.5
+): number {
+  const windowEnd = Math.min(windowStart + windowSize, anchors.length)
+
+  for (let i = windowStart; i < windowEnd; i++) {
+    if (wordOverlap(spokenText, anchors[i]) >= threshold) {
+      return i
+    }
+  }
+
+  return -1
+}
+
 export interface MatchResult {
   index: number
   score: number

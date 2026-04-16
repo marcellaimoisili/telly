@@ -62,7 +62,7 @@ export function ScriptEditor({ script, onScriptChange, onStartReading }: ScriptE
             whileHover={{ scale: script.trim() ? 1.01 : 1 }}
             whileTap={{ scale: script.trim() ? 0.99 : 1 }}
           >
-            Read Back Script
+            Read Script
           </motion.button>
         </div>
       </motion.div>

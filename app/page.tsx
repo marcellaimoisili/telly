@@ -9,7 +9,7 @@ import { StopButton } from "@/components/stop-button"
 import { MicIndicator } from "@/components/mic-indicator"
 import { useDeepgram } from "@/hooks/use-deepgram"
 import { chunkScript } from "@/lib/chunk"
-import { findBestMatch } from "@/lib/similarity"
+import { localMatch, findBestMatch } from "@/lib/similarity"
 
 type Mode = "editing" | "reading"
 
@@ -19,40 +19,60 @@ export default function Home() {
   const [pointerIndex, setPointerIndex] = useState(0)
 
   const pointerRef = useRef(0)
+  const anchorsRef = useRef<string[]>([])
   const anchorEmbeddingsRef = useRef<number[][]>([])
-  const lastEmbeddedWordCountRef = useRef(0)
+  const lastWordCountRef = useRef(0)
+
+  const advancePointer = useCallback((toIndex: number) => {
+    // Advance to the NEXT line (what the user needs to read)
+    const next = Math.min(toIndex + 1, anchorsRef.current.length - 1)
+    if (next > pointerRef.current) {
+      pointerRef.current = next
+      setPointerIndex(next)
+    }
+  }, [])
 
   const handleStableTranscript = useCallback(async (text: string) => {
     const words = text.split(/\s+/).filter(Boolean)
+    if (words.length <= lastWordCountRef.current) return
+    lastWordCountRef.current = words.length
 
-    // Only re-embed if >=2 new words since last embed call
-    if (words.length - lastEmbeddedWordCountRef.current < 2) return
-    lastEmbeddedWordCountRef.current = words.length
+    const recentSpeech = words.slice(-12).join(" ")
 
-    // Embed only the last ~10 words of speech
-    const recentWords = words.slice(-10).join(" ")
+    // Fast path: local word overlap (instant, no API call)
+    const local = localMatch(
+      recentSpeech,
+      anchorsRef.current,
+      pointerRef.current,
+      6,
+      0.5
+    )
+
+    if (local !== -1) {
+      advancePointer(local)
+      return
+    }
+
+    // Slow path: semantic embedding fallback (off-script)
     const res = await fetch("/api/embed", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ texts: [recentWords] }),
+      body: JSON.stringify({ texts: [recentSpeech] }),
     })
     const { embeddings } = await res.json()
 
-    // Sliding-window match against the next ~5 anchors
     const match = findBestMatch(
       embeddings[0],
       anchorEmbeddingsRef.current,
       pointerRef.current,
-      5,
-      0.6
+      8,
+      0.5
     )
 
-    // Only advance forward, never backward
-    if (match.index !== -1 && match.index >= pointerRef.current) {
-      pointerRef.current = match.index
-      setPointerIndex(match.index)
+    if (match.index !== -1) {
+      advancePointer(match.index)
     }
-  }, [])
+  }, [advancePointer])
 
   const { transcript, isConnected, error, start, stop } = useDeepgram({
     onStableTranscript: handleStableTranscript,
@@ -61,6 +81,7 @@ export default function Home() {
   const handleStartReading = useCallback(async () => {
     // 1. Chunk the script into ~5-word anchors
     const chunks = chunkScript(script)
+    anchorsRef.current = chunks
 
     // 2. Embed all anchors in one batched call
     const res = await fetch("/api/embed", {
@@ -74,7 +95,7 @@ export default function Home() {
     // 3. Reset pointer and switch to reading mode
     pointerRef.current = 0
     setPointerIndex(0)
-    lastEmbeddedWordCountRef.current = 0
+    lastWordCountRef.current = 0
     setMode("reading")
 
     // 4. Start streaming transcription
