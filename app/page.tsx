@@ -129,7 +129,7 @@ export default function Home() {
           ) : (
             <motion.div
               key="teleprompter"
-              className="flex h-full w-full items-center justify-center"
+              className="relative h-full w-full"
               initial={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
               animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
               exit={{ opacity: 0, scale: 0.95 }}

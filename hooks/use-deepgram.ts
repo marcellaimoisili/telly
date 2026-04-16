@@ -118,17 +118,20 @@ export function useDeepgram({ onStableTranscript }: UseDeepgramOptions = {}) {
           const full = finalizedRef.current
           setTranscript(full)
 
-          // Debounce 250ms before triggering match logic
-          if (debounceRef.current) clearTimeout(debounceRef.current)
-          debounceRef.current = setTimeout(() => {
-            callbackRef.current?.(full)
-          }, 250)
+          // Finals are stable — fire matching immediately
+          callbackRef.current?.(full)
         } else {
           // Show interim text immediately for responsiveness
           const full = finalizedRef.current
             ? `${finalizedRef.current} ${segmentText}`
             : segmentText
           setTranscript(full)
+
+          // Debounce interims 250ms before triggering match
+          if (debounceRef.current) clearTimeout(debounceRef.current)
+          debounceRef.current = setTimeout(() => {
+            callbackRef.current?.(full)
+          }, 250)
         }
       }
 
