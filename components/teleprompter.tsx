@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useEffect, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface TeleprompterProps {
@@ -25,10 +25,9 @@ export function Teleprompter({ script, pointerIndex }: TeleprompterProps) {
     return result
   }, [script])
 
-  // Calculate which line contains the current word
-  const currentLineIndex = useMemo(() => {
-    return Math.floor(pointerIndex / 5)
-  }, [pointerIndex])
+  // TODO: pointerIndex is now line-level from the matcher.
+  // Was: Math.floor(pointerIndex / 5) when pointer was word-level.
+  const currentLineIndex = pointerIndex
 
   // Scroll to keep current line centered
   useEffect(() => {

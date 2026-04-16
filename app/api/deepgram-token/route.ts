@@ -12,12 +12,24 @@ export async function GET() {
 
   const client = new DeepgramClient({ apiKey })
 
-  const response = await client.auth.v1.tokens.grant({
-    ttl_seconds: 30,
-  })
+  // 1. Get the project ID
+  const { projects } = await client.manage.v1.projects.list()
+  const projectId = projects?.[0]?.project_id
+  if (!projectId) {
+    return NextResponse.json(
+      { error: "No Deepgram project found" },
+      { status: 500 }
+    )
+  }
+
+  // 2. Create a short-lived API key scoped to transcription only
+  const keyResponse = await client.manage.v1.projects.keys.create(projectId, {
+    comment: "telly-temp",
+    scopes: ["usage:write"],
+    time_to_live_in_seconds: 30,
+  } as Record<string, unknown>)
 
   return NextResponse.json({
-    token: response.access_token,
-    expiresIn: response.expires_in,
+    key: keyResponse.key,
   })
 }

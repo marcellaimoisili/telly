@@ -1,12 +1,15 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ScriptEditor } from "@/components/script-editor"
 import { Teleprompter } from "@/components/teleprompter"
 import { ModeToggle } from "@/components/mode-toggle"
 import { StopButton } from "@/components/stop-button"
 import { MicIndicator } from "@/components/mic-indicator"
+import { useDeepgram } from "@/hooks/use-deepgram"
+import { chunkScript } from "@/lib/chunk"
+import { findBestMatch } from "@/lib/similarity"
 
 type Mode = "editing" | "reading"
 
@@ -14,51 +17,76 @@ export default function Home() {
   const [mode, setMode] = useState<Mode>("editing")
   const [script, setScript] = useState("")
   const [pointerIndex, setPointerIndex] = useState(0)
-  const [isListening, setIsListening] = useState(false)
 
-  // Demo: Auto-advance pointer when in reading mode (simulates transcription matching)
-  useEffect(() => {
-    if (mode !== "reading") return
+  const pointerRef = useRef(0)
+  const anchorEmbeddingsRef = useRef<number[][]>([])
+  const lastEmbeddedWordCountRef = useRef(0)
 
-    // TODO: Replace this demo auto-advance with actual transcription logic
-    // This interval simulates the AI matching spoken words to script
-    const words = script.split(/\s+/).filter(Boolean)
-    
-    const interval = setInterval(() => {
-      setPointerIndex((prev) => {
-        if (prev >= words.length - 1) {
-          // Reached end of script
-          return prev
-        }
-        return prev + 1
-      })
-    }, 800) // Simulates ~75 words per minute reading speed
+  const handleStableTranscript = useCallback(async (text: string) => {
+    const words = text.split(/\s+/).filter(Boolean)
 
-    return () => clearInterval(interval)
-  }, [mode, script])
+    // Only re-embed if >=2 new words since last embed call
+    if (words.length - lastEmbeddedWordCountRef.current < 2) return
+    lastEmbeddedWordCountRef.current = words.length
 
-  const handleStartReading = useCallback(() => {
+    // Embed only the last ~10 words of speech
+    const recentWords = words.slice(-10).join(" ")
+    const res = await fetch("/api/embed", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texts: [recentWords] }),
+    })
+    const { embeddings } = await res.json()
+
+    // Sliding-window match against the next ~5 anchors
+    const match = findBestMatch(
+      embeddings[0],
+      anchorEmbeddingsRef.current,
+      pointerRef.current,
+      5,
+      0.6
+    )
+
+    // Only advance forward, never backward
+    if (match.index !== -1 && match.index >= pointerRef.current) {
+      pointerRef.current = match.index
+      setPointerIndex(match.index)
+    }
+  }, [])
+
+  const { transcript, isConnected, error, start, stop } = useDeepgram({
+    onStableTranscript: handleStableTranscript,
+  })
+
+  const handleStartReading = useCallback(async () => {
+    // 1. Chunk the script into ~5-word anchors
+    const chunks = chunkScript(script)
+
+    // 2. Embed all anchors in one batched call
+    const res = await fetch("/api/embed", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texts: chunks }),
+    })
+    const { embeddings } = await res.json()
+    anchorEmbeddingsRef.current = embeddings
+
+    // 3. Reset pointer and switch to reading mode
+    pointerRef.current = 0
     setPointerIndex(0)
-    setIsListening(true)
+    lastEmbeddedWordCountRef.current = 0
     setMode("reading")
 
-    // TODO: Initialize speech recognition / transcription here
-    // Example:
-    // const recognition = new webkitSpeechRecognition()
-    // recognition.continuous = true
-    // recognition.interimResults = true
-    // recognition.onresult = (event) => { /* match to script, update pointerIndex */ }
-    // recognition.start()
-  }, [])
+    // 4. Start streaming transcription
+    await start()
+  }, [script, start])
 
   const handleStopReading = useCallback(() => {
+    stop()
     setMode("editing")
-    setIsListening(false)
+    pointerRef.current = 0
     setPointerIndex(0)
-
-    // TODO: Stop speech recognition here
-    // recognition.stop()
-  }, [])
+  }, [stop])
 
   return (
     <main className="relative flex h-dvh w-full flex-col overflow-hidden bg-background">
@@ -71,7 +99,7 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
             >
-              <MicIndicator isListening={isListening} />
+              <MicIndicator isListening={isConnected} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -110,12 +138,26 @@ export default function Home() {
               <Teleprompter
                 script={script}
                 pointerIndex={pointerIndex}
-                isListening={isListening}
+                isListening={isConnected}
               />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      {/* Debug transcript + error (bottom-left) */}
+      {mode === "reading" && (transcript || error) && (
+        <div className="absolute bottom-20 left-4 z-20 max-w-sm">
+          {error && (
+            <p className="text-xs text-red-400">{error}</p>
+          )}
+          {transcript && (
+            <p className="text-xs text-muted-foreground/50 line-clamp-2">
+              {transcript}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Floating stop button */}
       <AnimatePresence>
