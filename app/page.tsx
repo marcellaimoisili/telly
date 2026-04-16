@@ -44,7 +44,7 @@ export default function Home() {
       recentSpeech,
       anchorsRef.current,
       pointerRef.current,
-      6,
+      2,
       0.5
     )
 

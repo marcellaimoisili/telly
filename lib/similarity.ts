@@ -19,19 +19,32 @@ export function cosineSimilarity(a: number[], b: number[]): number {
   return dot / denom
 }
 
+const STOP_WORDS = new Set([
+  "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
+  "of", "with", "by", "is", "it", "that", "this", "was", "are", "be",
+  "have", "has", "had", "do", "does", "did", "not", "so", "if", "my",
+  "your", "i", "you", "we", "they", "he", "she", "me", "us", "them",
+  "its", "from", "as", "no", "up", "out", "all", "just", "about",
+])
+
 /**
  * Fast local word overlap between spoken text and an anchor.
- * Returns the fraction of anchor words found in the spoken text (0-1).
+ * Filters stop words so only content words drive the match.
+ * Returns the fraction of content anchor words found in speech (0-1).
  */
 export function wordOverlap(spoken: string, anchor: string): number {
   const spokenWords = new Set(
-    spoken.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/).filter(Boolean)
+    spoken
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .split(/\s+/)
+      .filter((w) => w && !STOP_WORDS.has(w))
   )
   const anchorWords = anchor
     .toLowerCase()
     .replace(/[^\w\s]/g, "")
     .split(/\s+/)
-    .filter(Boolean)
+    .filter((w) => w && !STOP_WORDS.has(w))
 
   if (anchorWords.length === 0) return 0
 
