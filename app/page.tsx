@@ -21,10 +21,9 @@ export default function Home() {
   const pointerRef = useRef(0)
   const anchorsRef = useRef<string[]>([])
   const anchorEmbeddingsRef = useRef<number[][]>([])
-  const lastWordCountRef = useRef(0)
+  const consumedRef = useRef(0) // words consumed by successful matches
 
   const advancePointer = useCallback((toIndex: number) => {
-    // Advance to the NEXT line (what the user needs to read)
     const next = Math.min(toIndex + 1, anchorsRef.current.length - 1)
     if (next > pointerRef.current) {
       pointerRef.current = next
@@ -34,14 +33,16 @@ export default function Home() {
 
   const handleStableTranscript = useCallback(async (text: string) => {
     const words = text.split(/\s+/).filter(Boolean)
-    if (words.length <= lastWordCountRef.current) return
-    lastWordCountRef.current = words.length
 
-    const recentSpeech = words.slice(-12).join(" ")
+    // Only consider words spoken SINCE the last successful match
+    const newWords = words.slice(consumedRef.current)
+    if (newWords.length < 2) return
 
-    // Fast path: local word overlap (instant, no API call)
+    const newSpeech = newWords.join(" ")
+
+    // Fast path: local word overlap against the next 2 anchors
     const local = localMatch(
-      recentSpeech,
+      newSpeech,
       anchorsRef.current,
       pointerRef.current,
       2,
@@ -49,15 +50,18 @@ export default function Home() {
     )
 
     if (local !== -1) {
+      consumedRef.current = words.length // consume matched words
       advancePointer(local)
       return
     }
 
-    // Slow path: semantic embedding fallback (off-script)
+    // Slow path: only after enough unmatched words accumulate (user is off-script)
+    if (newWords.length < 8) return
+
     const res = await fetch("/api/embed", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ texts: [recentSpeech] }),
+      body: JSON.stringify({ texts: [newSpeech] }),
     })
     const { embeddings } = await res.json()
 
@@ -65,11 +69,12 @@ export default function Home() {
       embeddings[0],
       anchorEmbeddingsRef.current,
       pointerRef.current,
-      8,
+      5,
       0.5
     )
 
     if (match.index !== -1) {
+      consumedRef.current = words.length
       advancePointer(match.index)
     }
   }, [advancePointer])
@@ -95,7 +100,7 @@ export default function Home() {
     // 3. Reset pointer and switch to reading mode
     pointerRef.current = 0
     setPointerIndex(0)
-    lastWordCountRef.current = 0
+    consumedRef.current = 0
     setMode("reading")
 
     // 4. Start streaming transcription
