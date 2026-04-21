@@ -1,0 +1,43 @@
+{
+  "name": "Product Demo",
+  "domain": "Technology",
+  "anchors": [
+    "Welcome to the demonstration of our",
+    "revolutionary software platform Today I'll show",
+    "you how this tool can streamline",
+    "your entire workflow With just a",
+    "few clicks you can automate tasks",
+    "that previously took hours to complete",
+    "The interface is intuitive and user",
+    "friendly requiring no technical knowledge",
+    "Let me walk you through the main",
+    "features and show you its full potential"
+  ],
+  "testCases": [
+    {
+      "speech": "Welcome to the demonstration of our",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "Today I'll show you how this works",
+      "expectedAnchorIndex": 1,
+      "label": "exact"
+    },
+    {
+      "speech": "Let me present our new software",
+      "expectedAnchorIndex": 0,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "The system saves you lots of time",
+      "expectedAnchorIndex": 4,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "I like eating pizza very much",
+      "expectedAnchorIndex": -1,
+      "label": "off-script"
+    }
+  ]
+}

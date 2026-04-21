@@ -1,0 +1,43 @@
+{
+  "name": "Award Speech",
+  "domain": "Ceremony",
+  "anchors": [
+    "It is truly an honor to",
+    "stand before you tonight I never",
+    "imagined I would be standing on",
+    "this stage when I started my",
+    "journey ten years ago The support",
+    "I received from my family and",
+    "friends has been invaluable This award",
+    "belongs to all of them as",
+    "much as it does to me",
+    "Thank you for this incredible recognition"
+  ],
+  "testCases": [
+    {
+      "speech": "It is truly an honor to stand",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "I never imagined I would be here",
+      "expectedAnchorIndex": 1,
+      "label": "exact"
+    },
+    {
+      "speech": "I'm deeply grateful for this moment",
+      "expectedAnchorIndex": 0,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "My loved ones deserve credit too",
+      "expectedAnchorIndex": 6,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "The sky is blue and beautiful",
+      "expectedAnchorIndex": -1,
+      "label": "off-script"
+    }
+  ]
+}

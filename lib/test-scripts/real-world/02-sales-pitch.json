@@ -1,0 +1,43 @@
+{
+  "name": "Sales Pitch",
+  "domain": "Business",
+  "anchors": [
+    "Thank you all for being",
+    "here today I want to",
+    "introduce you to our latest",
+    "product innovation Our team has",
+    "spent months perfecting this solution",
+    "to address your most pressing",
+    "business challenges This product will",
+    "save you time and money",
+    "while improving your overall productivity",
+    "by up to fifty percent"
+  ],
+  "testCases": [
+    {
+      "speech": "Thank you all for being here",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "introduce you to our latest product",
+      "expectedAnchorIndex": 2,
+      "label": "exact"
+    },
+    {
+      "speech": "Thanks for coming everyone",
+      "expectedAnchorIndex": 0,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "This tool will help you work faster",
+      "expectedAnchorIndex": 7,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "I had pizza for lunch yesterday",
+      "expectedAnchorIndex": -1,
+      "label": "off-script"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "News Broadcast",
+  "domain": "News",
+  "anchors": [
+    "Good evening I'm your",
+    "host bringing you today's",
+    "top stories from around",
+    "the world In breaking",
+    "news a major technological",
+    "breakthrough was announced today",
+    "by leading researchers The",
+    "discovery could revolutionize how",
+    "we approach renewable energy",
+    "solutions for the future"
+  ],
+  "testCases": [
+    {
+      "speech": "Good evening I'm your host",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "bringing you today's top stories",
+      "expectedAnchorIndex": 1,
+      "label": "exact"
+    },
+    {
+      "speech": "Hello everyone my name is",
+      "expectedAnchorIndex": 0,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "In the news we have announcements",
+      "expectedAnchorIndex": 4,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "The weather is very nice today",
+      "expectedAnchorIndex": -1,
+      "label": "off-script"
+    }
+  ]
+}

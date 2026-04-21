@@ -48,13 +48,13 @@ export interface TuningResult {
 }
 
 /**
- * Load test script JSON files from lib/test-scripts/
+ * Load test script JSON files from lib/test-scripts/real-world/
  */
 function loadTestScripts(): ScriptTestData[] {
-  const testScriptsDir = path.join(__dirname, "test-scripts")
+  const testScriptsDir = path.join(__dirname, "test-scripts", "real-world")
   const scripts: ScriptTestData[] = []
 
-  const files = ["hamlet.json", "wasabi.json", "shoes.json"]
+  const files = fs.readdirSync(testScriptsDir).filter((f) => f.endsWith(".json")).sort()
 
   for (const file of files) {
     const filePath = path.join(testScriptsDir, file)
@@ -167,7 +167,7 @@ async function semanticTuning(): Promise<TuningResult> {
   console.log("Grid search (penalizing false positives heavily)...")
   console.log()
 
-  const thresholds = [0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60]
+  const thresholds = [0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80]
 
   let bestResult: TuningResult | null = null
 
@@ -231,8 +231,9 @@ async function semanticTuning(): Promise<TuningResult> {
     }
 
     const accuracy = correctMatches / allTestCases.length
-    // Heavy penalty for false positives (they're worse than false negatives)
-    const score = accuracy - falsePositives * 0.5
+    // Precision and recall matter equally: prefer catching reads over avoiding wrong-anchors
+    // Score = accuracy - (0.1 * false_positives) to avoid bias toward low-match thresholds
+    const score = accuracy - falsePositives * 0.1
     const result: TuningResult = {
       semanticThreshold: threshold,
       accuracy,

@@ -1,0 +1,43 @@
+{
+  "name": "Testimonial",
+  "domain": "Marketing",
+  "anchors": [
+    "I cannot say enough good things",
+    "about this company and their service",
+    "When I first started working with them",
+    "I was skeptical but they proved me",
+    "wrong very quickly Their expertise and",
+    "professionalism exceeded all my expectations",
+    "The results I've achieved have been",
+    "transformative for my business If you're",
+    "considering partnering with them I highly",
+    "recommend them without hesitation whatsoever"
+  ],
+  "testCases": [
+    {
+      "speech": "I cannot say enough good things",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "about this company and their service",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "This organization is absolutely fantastic",
+      "expectedAnchorIndex": 0,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "They delivered incredible business results",
+      "expectedAnchorIndex": 6,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "The dog ran through the park",
+      "expectedAnchorIndex": -1,
+      "label": "off-script"
+    }
+  ]
+}
