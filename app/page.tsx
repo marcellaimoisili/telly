@@ -46,14 +46,6 @@ export default function Home() {
 
     const newSpeech = newWords.join(" ")
 
-    // DEBUG: log what we're matching
-    console.log(`[MATCH DEBUG]`)
-    console.log(`  Total words heard: ${words.length}`)
-    console.log(`  Words consumed: ${consumedRef.current}`)
-    console.log(`  New words: ${newWords.length} → "${newSpeech.substring(0, 50)}..."`)
-    console.log(`  Current pointer: ${pointerRef.current}`)
-    console.log(`  Current anchor: "${anchorsRef.current[pointerRef.current]?.substring(0, 50)}..."`)
-
     // Fast path: LCS-based matching against the next 1 anchor (sequence-aware, no stop-word issues)
     // Threshold 0.5 = match when 50%+ of anchor words found in sequence (tolerates some garbage from Deepgram)
     const local = lcsLocalMatch(
@@ -64,22 +56,16 @@ export default function Home() {
       0.5
     )
 
-    console.log(`  Fast path result: ${local !== -1 ? `matched anchor ${local}` : "no match"}`)
-
     if (local !== -1) {
       consumedRef.current = words.length // consume matched words
       advancePointer(local)
-      console.log(`  ✓ Advanced pointer to ${pointerRef.current}`)
       return
     }
 
     // Slow path: only after enough unmatched words accumulate (user is off-script) (tuned to 4)
     if (newWords.length < 4) {
-      console.log(`  [SKIPPING SEMANTIC] Only ${newWords.length} new words (need 4+)`)
       return
     }
-
-    console.log(`  [SEMANTIC FALLBACK] Embedding "${newSpeech.substring(0, 50)}..."`)
 
     // CRITICAL: Capture pointer NOW, before async embedding
     // If pointer advances while embedding is in flight, we want to use the old value
@@ -103,12 +89,9 @@ export default function Home() {
       0.4
     )
 
-    console.log(`  Semantic match: ${match.index !== -1 ? `anchor ${match.index} (score ${match.score.toFixed(2)})` : "no match"}`)
-
     if (match.index !== -1) {
       consumedRef.current = words.length
       advancePointer(match.index)
-      console.log(`  ✓ Semantic advanced pointer to ${pointerRef.current}`)
     }
   }, [advancePointer, keys.openaiKey])
 
