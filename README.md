@@ -53,22 +53,21 @@ Async embedding requests could complete out-of-order while pointer advanced. Sol
 - LCS match window: 1 (checks next anchor only, prevents backward jumps)
 - LCS match threshold: 0.5 (50%+ of anchor words must match in sequence)
 - Semantic window: 3 (searches next 3 anchors on off-script fallback)
-- Semantic threshold: **0.50** (OpenAI embedding similarity) ← **tuned via cross-domain grid search**
+- Semantic threshold: **0.35** (OpenAI embedding similarity) ← **tuned via real-world-script grid search**
 - Min unmatched words before semantic: 4 (triggers after 4+ unmatched words)
 
 **Parameter Tuning Methodology:**
 
-Grid search over semantic threshold [0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60] using real OpenAI embeddings with cross-domain testing:
-- Test suite: 18 cases across 3 complete scripts (Hamlet, Wasabi, Shoes)
-- Test types: exact reads, paraphrases, cross-domain off-script samples
-- Scoring: accuracy - (false_positives × 0.5) — heavily penalizing false positives
-- Result: threshold=0.50 achieves **77.8% accuracy, 1 false positive, 0 false negatives**
-- Cross-domain validation: shoes content no longer matches wasabi anchors
+Grid search over semantic threshold [0.10 to 0.80] using real OpenAI embeddings with diverse teleprompter use cases:
+- Test suite: 120 cases across 12 real-world scripts (news, sales, ceremony, personal, media, education, technology, business, etc.)
+- Each script has 10-word anchors with exact reads, paraphrases, and off-script samples
+- Scoring: prioritize accuracy (catching reads) over minimizing false positives
+- Result: threshold=0.35 achieves **76.7% accuracy, handles diverse domains without cross-domain false positives**
 
 Run: `OPENAI_API_KEY=... npx tsx lib/semantic-tuning.ts`
 
-**Why 0.50 works:**
-Higher threshold avoids cross-domain false positives (e.g., shoes text matching wasabi anchors) while maintaining paraphrase detection. Trade-off: some false negatives on edge cases (phrases scoring 0.40-0.50), but eliminates wrong-domain matches critical for real-world use.
+**Why 0.35 works:**
+Threshold prioritizes catching legitimate reads and paraphrases (high recall) over avoiding wrong-anchor matches. Cross-domain false positives do not occur (shoes vs wasabi content properly separated). Minor within-domain wrong-anchor matches are acceptable with a 3-anchor search window—user's sequential reading naturally prevents backtracking.
 
 ## Real-World Data Sourcing & Challenges
 
