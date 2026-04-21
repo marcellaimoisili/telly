@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server"
 import OpenAI from "openai"
 
-const openai = new OpenAI() // reads OPENAI_API_KEY from env
-
 const MAX_TEXTS = 500
 
 export async function POST(req: Request) {
-  const apiKey = process.env.OPENAI_API_KEY
+  const apiKey = req.headers.get("x-openai-key") || process.env.OPENAI_API_KEY
   if (!apiKey) {
     return NextResponse.json(
       { error: "OPENAI_API_KEY is not configured" },
       { status: 500 }
     )
   }
+
+  const openai = new OpenAI({ apiKey })
 
   let body: { texts?: string[] }
   try {

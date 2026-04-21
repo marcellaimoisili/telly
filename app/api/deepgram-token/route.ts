@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import { DeepgramClient } from "@deepgram/sdk"
 
-export async function GET() {
-  const apiKey = process.env.DEEPGRAM_API_KEY
+export async function GET(req: Request) {
+  const apiKey = req.headers.get("x-deepgram-key") || process.env.DEEPGRAM_API_KEY
   if (!apiKey) {
     return NextResponse.json(
       { error: "DEEPGRAM_API_KEY is not configured" },

@@ -5,15 +5,19 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ScriptEditor } from "@/components/script-editor"
 import { Teleprompter } from "@/components/teleprompter"
 import { ModeToggle } from "@/components/mode-toggle"
+import { SettingsDialog } from "@/components/settings-dialog"
 import { StopButton } from "@/components/stop-button"
 import { MicIndicator } from "@/components/mic-indicator"
 import { useDeepgram } from "@/hooks/use-deepgram"
+import { useApiKeys } from "@/hooks/use-api-keys"
 import { chunkScript } from "@/lib/chunk"
-import { localMatch, findBestMatch } from "@/lib/similarity"
+import { findBestMatch } from "@/lib/similarity"
+import { lcsLocalMatch } from "@/lib/lcs-matcher"
 
 type Mode = "editing" | "reading"
 
 export default function Home() {
+  const { keys, saveKeys } = useApiKeys()
   const [mode, setMode] = useState<Mode>("editing")
   const [script, setScript] = useState("")
   const [pointerIndex, setPointerIndex] = useState(0)
@@ -24,6 +28,8 @@ export default function Home() {
   const consumedRef = useRef(0) // words consumed by successful matches
 
   const advancePointer = useCallback((toIndex: number) => {
+    // Advance pointer: when line N matches confidently, show line N+1 next
+    // User has mostly finished line N, needs to see what comes next
     const next = Math.min(toIndex + 1, anchorsRef.current.length - 1)
     if (next > pointerRef.current) {
       pointerRef.current = next
@@ -40,27 +46,51 @@ export default function Home() {
 
     const newSpeech = newWords.join(" ")
 
-    // Fast path: local word overlap against the next 2 anchors
-    const local = localMatch(
+    // DEBUG: log what we're matching
+    console.log(`[MATCH DEBUG]`)
+    console.log(`  Total words heard: ${words.length}`)
+    console.log(`  Words consumed: ${consumedRef.current}`)
+    console.log(`  New words: ${newWords.length} → "${newSpeech.substring(0, 50)}..."`)
+    console.log(`  Current pointer: ${pointerRef.current}`)
+    console.log(`  Current anchor: "${anchorsRef.current[pointerRef.current]?.substring(0, 50)}..."`)
+
+    // Fast path: LCS-based matching against the next 1 anchor (sequence-aware, no stop-word issues)
+    // Threshold 0.5 = match when 50%+ of anchor words found in sequence (tolerates some garbage from Deepgram)
+    const local = lcsLocalMatch(
       newSpeech,
       anchorsRef.current,
       pointerRef.current,
-      2,
+      1,
       0.5
     )
+
+    console.log(`  Fast path result: ${local !== -1 ? `matched anchor ${local}` : "no match"}`)
 
     if (local !== -1) {
       consumedRef.current = words.length // consume matched words
       advancePointer(local)
+      console.log(`  ✓ Advanced pointer to ${pointerRef.current}`)
       return
     }
 
-    // Slow path: only after enough unmatched words accumulate (user is off-script)
-    if (newWords.length < 8) return
+    // Slow path: only after enough unmatched words accumulate (user is off-script) (tuned to 4)
+    if (newWords.length < 4) {
+      console.log(`  [SKIPPING SEMANTIC] Only ${newWords.length} new words (need 4+)`)
+      return
+    }
+
+    console.log(`  [SEMANTIC FALLBACK] Embedding "${newSpeech.substring(0, 50)}..."`)
+
+    // CRITICAL: Capture pointer NOW, before async embedding
+    // If pointer advances while embedding is in flight, we want to use the old value
+    const semanticWindowStart = pointerRef.current
 
     const res = await fetch("/api/embed", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(keys.openaiKey && { "x-openai-key": keys.openaiKey }),
+      },
       body: JSON.stringify({ texts: [newSpeech] }),
     })
     const { embeddings } = await res.json()
@@ -68,19 +98,23 @@ export default function Home() {
     const match = findBestMatch(
       embeddings[0],
       anchorEmbeddingsRef.current,
-      pointerRef.current,
-      5,
-      0.5
+      semanticWindowStart,
+      3,
+      0.4
     )
+
+    console.log(`  Semantic match: ${match.index !== -1 ? `anchor ${match.index} (score ${match.score.toFixed(2)})` : "no match"}`)
 
     if (match.index !== -1) {
       consumedRef.current = words.length
       advancePointer(match.index)
+      console.log(`  ✓ Semantic advanced pointer to ${pointerRef.current}`)
     }
-  }, [advancePointer])
+  }, [advancePointer, keys.openaiKey])
 
   const { transcript, isConnected, error, start, stop } = useDeepgram({
     onStableTranscript: handleStableTranscript,
+    deepgramKey: keys.deepgramKey,
   })
 
   const handleStartReading = useCallback(async () => {
@@ -91,7 +125,10 @@ export default function Home() {
     // 2. Embed all anchors in one batched call
     const res = await fetch("/api/embed", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(keys.openaiKey && { "x-openai-key": keys.openaiKey }),
+      },
       body: JSON.stringify({ texts: chunks }),
     })
     const { embeddings } = await res.json()
@@ -105,7 +142,7 @@ export default function Home() {
 
     // 4. Start streaming transcription
     await start()
-  }, [script, start])
+  }, [script, start, keys.openaiKey])
 
   const handleStopReading = useCallback(() => {
     stop()
@@ -129,7 +166,8 @@ export default function Home() {
             </motion.div>
           )}
         </AnimatePresence>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <SettingsDialog keys={keys} onSave={saveKeys} />
           <ModeToggle />
         </div>
       </header>

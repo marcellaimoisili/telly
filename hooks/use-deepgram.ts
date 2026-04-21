@@ -4,6 +4,7 @@ import { useRef, useState, useCallback } from "react"
 
 interface UseDeepgramOptions {
   onStableTranscript?: (transcript: string) => void
+  deepgramKey?: string
 }
 
 function getSupportedMimeType(): string {
@@ -18,7 +19,7 @@ function getSupportedMimeType(): string {
   return ""
 }
 
-export function useDeepgram({ onStableTranscript }: UseDeepgramOptions = {}) {
+export function useDeepgram({ onStableTranscript, deepgramKey }: UseDeepgramOptions = {}) {
   const [transcript, setTranscript] = useState("")
   const [isConnected, setIsConnected] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -62,7 +63,9 @@ export function useDeepgram({ onStableTranscript }: UseDeepgramOptions = {}) {
       setError(null)
 
       // 1. Mint a short-lived API key server-side
-      const res = await fetch("/api/deepgram-token")
+      const res = await fetch("/api/deepgram-token", {
+        headers: deepgramKey ? { "x-deepgram-key": deepgramKey } : {},
+      })
       if (!res.ok) throw new Error("Failed to get Deepgram key")
       const { key } = await res.json()
 
