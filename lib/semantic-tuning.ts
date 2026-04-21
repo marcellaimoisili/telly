@@ -231,9 +231,9 @@ async function semanticTuning(): Promise<TuningResult> {
     }
 
     const accuracy = correctMatches / allTestCases.length
-    // Precision and recall matter equally: prefer catching reads over avoiding wrong-anchors
-    // Score = accuracy - (0.1 * false_positives) to avoid bias toward low-match thresholds
-    const score = accuracy - falsePositives * 0.1
+    // Prioritize: 1) Maximize accuracy (catching reads), 2) Minimize false positives
+    // F1-style score: weighted toward accuracy with penalty for false positives
+    const score = accuracy * 2 - falsePositives * 0.01
     const result: TuningResult = {
       semanticThreshold: threshold,
       accuracy,
