@@ -55,8 +55,6 @@ export default function Home() {
       1,
       0.5
     )
-    console.log(`[LCS FAST] "${newSpeech.substring(0, 40)}..." vs anchor ${pointerRef.current} → ${local !== -1 ? "match" : "no match"}`)
-
     if (local !== -1) {
       consumedRef.current = words.length // consume matched words
       advancePointer(local)
@@ -87,12 +85,11 @@ export default function Home() {
       anchorEmbeddingsRef.current,
       semanticWindowStart,
       3,
-      0.5
+      0.25
     )
 
     if (match.index !== -1) {
       consumedRef.current = words.length
-      console.log(`[SEMANTIC MATCH] "${newSpeech}" → anchor ${match.index}: "${anchorsRef.current[match.index]?.substring(0, 60)}..." (score ${match.score.toFixed(3)})`)
       advancePointer(match.index)
     }
   }, [advancePointer, keys.openaiKey])
