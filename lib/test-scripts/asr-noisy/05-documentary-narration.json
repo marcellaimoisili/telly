@@ -1,0 +1,63 @@
+{
+  "name": "Documentary Narration",
+  "domain": "Media",
+  "anchors": [
+    "For millions of years the Earth",
+    "has been home to incredible creatures",
+    "These animals have adapted to their",
+    "environments in remarkable ways From the",
+    "depths of the ocean to the",
+    "highest mountains life flourishes everywhere",
+    "But today many species face extinction",
+    "due to human activity We must",
+    "act now to protect our planet",
+    "and preserve these wonders for future"
+  ],
+  "testCases": [
+    {
+      "speech": "For millions of years the Earth",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "for millions of years the earth",
+      "expectedAnchorIndex": 0,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "These animals have adapted remarkably",
+      "expectedAnchorIndex": 2,
+      "label": "exact"
+    },
+    {
+      "speech": "these animals have remarkably",
+      "expectedAnchorIndex": 2,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "Our world is home to diverse life",
+      "expectedAnchorIndex": 0,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "our world is home to diverse life",
+      "expectedAnchorIndex": 0,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "Species are disappearing because of us",
+      "expectedAnchorIndex": 6,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "species are disappearing because of us",
+      "expectedAnchorIndex": 6,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "Coffee tastes better in the morning",
+      "expectedAnchorIndex": -1,
+      "label": "off-script"
+    }
+  ]
+}

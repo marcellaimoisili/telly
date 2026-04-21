@@ -1,0 +1,63 @@
+{
+  "name": "Sermon",
+  "domain": "Religious",
+  "anchors": [
+    "Blessed are those who show mercy",
+    "for they shall receive mercy in",
+    "return Compassion is not weakness but",
+    "the greatest strength we can possess",
+    "When we choose love over judgment",
+    "we transform not only ourselves but",
+    "those around us as well The",
+    "path to enlightenment begins with understanding",
+    "and forgiving ourselves and others",
+    "Let us walk this path together"
+  ],
+  "testCases": [
+    {
+      "speech": "Blessed are those who show mercy",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "blessed are those who show mercy",
+      "expectedAnchorIndex": 0,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "Compassion is not weakness but strength",
+      "expectedAnchorIndex": 2,
+      "label": "exact"
+    },
+    {
+      "speech": "compassion is not weakness you know but strength",
+      "expectedAnchorIndex": 2,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "Kind people receive kindness back",
+      "expectedAnchorIndex": 0,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "kind people receive kindness back",
+      "expectedAnchorIndex": 0,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "Love is more powerful than hate",
+      "expectedAnchorIndex": 4,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "love is more powerful than hate",
+      "expectedAnchorIndex": 4,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "My dog likes to play fetch",
+      "expectedAnchorIndex": -1,
+      "label": "off-script"
+    }
+  ]
+}

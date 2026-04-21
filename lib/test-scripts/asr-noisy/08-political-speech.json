@@ -1,0 +1,63 @@
+{
+  "name": "Political Speech",
+  "domain": "Politics",
+  "anchors": [
+    "My fellow citizens we gather here",
+    "today to reaffirm our commitment to",
+    "the values that make our nation",
+    "great Freedom justice and opportunity for",
+    "all are not just ideals but",
+    "rights we must defend and protect",
+    "Together we can build a stronger",
+    "future where every voice matters and",
+    "every person has a path to success",
+    "This is our responsibility and our honor"
+  ],
+  "testCases": [
+    {
+      "speech": "My fellow citizens we gather here",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "my my fellow citizens we gather uh here",
+      "expectedAnchorIndex": 0,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "we gather today to reaffirm our commitment",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "like we gather today to reaffirm our commitment",
+      "expectedAnchorIndex": 0,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "Friends we meet at a critical moment",
+      "expectedAnchorIndex": 0,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "friends we so meet at at a critical",
+      "expectedAnchorIndex": 0,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "We must protect everyone's fundamental rights",
+      "expectedAnchorIndex": 3,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "we we must protect everyone's fundamental rights",
+      "expectedAnchorIndex": 3,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "The restaurant serves excellent seafood",
+      "expectedAnchorIndex": -1,
+      "label": "off-script"
+    }
+  ]
+}

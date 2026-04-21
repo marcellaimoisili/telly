@@ -1,0 +1,63 @@
+{
+  "name": "Training Presentation",
+  "domain": "Education",
+  "anchors": [
+    "Welcome to today's training session My",
+    "name is your instructor and I'll be",
+    "guiding you through this comprehensive program",
+    "Our goal is to equip you with",
+    "practical skills and knowledge you can",
+    "immediately apply in your daily work",
+    "We'll cover theory and practice with",
+    "plenty of hands on exercises Throughout",
+    "this journey please ask questions and",
+    "engage actively with your fellow participants"
+  ],
+  "testCases": [
+    {
+      "speech": "Welcome to today's training session My",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "welcome to today's today's training session",
+      "expectedAnchorIndex": 0,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "My name is your instructor",
+      "expectedAnchorIndex": 1,
+      "label": "exact"
+    },
+    {
+      "speech": "my name is your instructor",
+      "expectedAnchorIndex": 1,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "Hello everyone let's begin the training",
+      "expectedAnchorIndex": 0,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "hello um let's begin the training",
+      "expectedAnchorIndex": 0,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "Work with your classmates and share ideas",
+      "expectedAnchorIndex": 8,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "work with your classmates and share ideas",
+      "expectedAnchorIndex": 8,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "The coffee machine is broken today",
+      "expectedAnchorIndex": -1,
+      "label": "off-script"
+    }
+  ]
+}

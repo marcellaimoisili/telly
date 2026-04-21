@@ -1,0 +1,63 @@
+{
+  "name": "Wedding Vows",
+  "domain": "Personal",
+  "anchors": [
+    "I take you to be my",
+    "husband wife and partner in",
+    "life I promise to love you",
+    "unconditionally through joy and sorrow",
+    "in sickness and in health",
+    "I will support your dreams and",
+    "stand by your side no matter",
+    "what challenges we face together",
+    "You are my best friend",
+    "and my greatest love forever"
+  ],
+  "testCases": [
+    {
+      "speech": "I take you to be my husband",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "i take you to be my husband",
+      "expectedAnchorIndex": 0,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "I promise to love you unconditionally",
+      "expectedAnchorIndex": 2,
+      "label": "exact"
+    },
+    {
+      "speech": "i promise to love you unconditionally",
+      "expectedAnchorIndex": 2,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "I choose to marry you today",
+      "expectedAnchorIndex": 0,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "i i uh choose to marry you today",
+      "expectedAnchorIndex": 0,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "You mean everything to me",
+      "expectedAnchorIndex": 8,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "you mean everything to me",
+      "expectedAnchorIndex": 8,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "I enjoy watching television shows",
+      "expectedAnchorIndex": -1,
+      "label": "off-script"
+    }
+  ]
+}

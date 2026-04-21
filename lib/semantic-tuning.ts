@@ -51,21 +51,19 @@ export interface TuningResult {
  * Load test script JSON files from lib/test-scripts/real-world/
  */
 function loadTestScripts(): ScriptTestData[] {
-  const testScriptsDir = path.join(__dirname, "test-scripts", "real-world")
+  const dirs = [
+    path.join(__dirname, "test-scripts", "real-world"),
+    path.join(__dirname, "test-scripts", "asr-noisy"),
+  ]
   const scripts: ScriptTestData[] = []
 
-  const files = fs.readdirSync(testScriptsDir).filter((f) => f.endsWith(".json")).sort()
-
-  for (const file of files) {
-    const filePath = path.join(testScriptsDir, file)
-    const content = fs.readFileSync(filePath, "utf-8")
-    const data = JSON.parse(content)
-
-    scripts.push({
-      name: data.name,
-      anchors: data.anchors,
-      testCases: data.testCases,
-    })
+  for (const dir of dirs) {
+    if (!fs.existsSync(dir)) continue
+    const files = fs.readdirSync(dir).filter((f) => f.endsWith(".json")).sort()
+    for (const file of files) {
+      const data = JSON.parse(fs.readFileSync(path.join(dir, file), "utf-8"))
+      scripts.push({ name: data.name, anchors: data.anchors, testCases: data.testCases })
+    }
   }
 
   return scripts
@@ -231,9 +229,9 @@ async function semanticTuning(): Promise<TuningResult> {
     }
 
     const accuracy = correctMatches / allTestCases.length
-    // Priority: maximize accuracy (catching reads), false positives slightly worse than false negatives
-    // Score weights: 1.0 (accuracy) - 0.05 (each FP) - 0.02 (each FN)
-    const score = accuracy - falsePositives * 0.05 - falseNegatives * 0.02
+    // FP is 2x worse than FN (validated: 0.35 wins unanimously at 1.5x–3.0x ratio)
+    // See coefficient-sensitivity.ts for full analysis across 100 FP/FN combinations
+    const score = accuracy - falsePositives * 0.04 - falseNegatives * 0.02
     const result: TuningResult = {
       semanticThreshold: threshold,
       accuracy,
@@ -319,7 +317,7 @@ async function semanticTuning(): Promise<TuningResult> {
   console.log("TUNING COMPLETE")
   console.log("=".repeat(70))
   console.log()
-  console.log(`Best Parameters (zero false positives preferred):`)
+  console.log(`Best Parameters (accuracy-first, FP 2x worse than FN):`)
   console.log(
     `   Semantic Threshold: ${bestResult!.semanticThreshold.toFixed(2)}`
   )

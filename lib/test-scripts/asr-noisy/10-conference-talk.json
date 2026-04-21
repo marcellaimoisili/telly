@@ -1,0 +1,63 @@
+{
+  "name": "Conference Talk",
+  "domain": "Education",
+  "anchors": [
+    "Good morning everyone Today I want",
+    "to share insights from our recent",
+    "research study on human behavior and",
+    "decision making The findings challenge some",
+    "of our conventional assumptions about how",
+    "people actually think and choose What",
+    "we discovered is that emotions play",
+    "a far greater role than we previously",
+    "understood in shaping our judgments and",
+    "determining our actions in complex situations"
+  ],
+  "testCases": [
+    {
+      "speech": "Good morning everyone Today I want",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "good morning everyone today i want",
+      "expectedAnchorIndex": 0,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "to share insights from our research",
+      "expectedAnchorIndex": 1,
+      "label": "exact"
+    },
+    {
+      "speech": "to share insights from our research",
+      "expectedAnchorIndex": 1,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "Hello friends I have findings to share",
+      "expectedAnchorIndex": 0,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "hello friends i have you know findings to share",
+      "expectedAnchorIndex": 0,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "Feelings influence our choices more than logic",
+      "expectedAnchorIndex": 6,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "feelings feelings influence our choices more um than logic",
+      "expectedAnchorIndex": 6,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "I prefer tea over coffee in mornings",
+      "expectedAnchorIndex": -1,
+      "label": "off-script"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "name": "Interview Response",
+  "domain": "Media",
+  "anchors": [
+    "That's a great question and I'm",
+    "glad you asked it The reason I",
+    "started this journey was to make a",
+    "difference in people's lives Every day",
+    "I wake up knowing that my work",
+    "matters and that drives me forward",
+    "Challenges are inevitable but we view",
+    "them as opportunities to learn and grow",
+    "The team around me is exceptional",
+    "and together we achieve remarkable things"
+  ],
+  "testCases": [
+    {
+      "speech": "That's a great question and I'm glad",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "that's a question and i'm glad",
+      "expectedAnchorIndex": 0,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "The reason I started this was to help",
+      "expectedAnchorIndex": 1,
+      "label": "exact"
+    },
+    {
+      "speech": "the reason i started this was to so help",
+      "expectedAnchorIndex": 1,
+      "label": "asr-exact"
+    },
+    {
+      "speech": "I appreciate that excellent question",
+      "expectedAnchorIndex": 0,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "like i so appreciate that excellent question",
+      "expectedAnchorIndex": 0,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "Our team accomplishes incredible results together",
+      "expectedAnchorIndex": 8,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "so our um team uh accomplishes incredible results together",
+      "expectedAnchorIndex": 8,
+      "label": "asr-paraphrase"
+    },
+    {
+      "speech": "The mountains are covered in snow",
+      "expectedAnchorIndex": -1,
+      "label": "off-script"
+    }
+  ]
+}
