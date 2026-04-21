@@ -17,18 +17,26 @@
  *   Problem: Movie context differs from teleprompter reading (actors improvise, edit during post-production).
  *
  * Core challenge: Most speech datasets capture what was *said*, not what was *supposed to be said*.
- * This script uses Hamlet (known script) + synthetically generated paraphrases/off-script samples,
- * then tunes on real OpenAI embeddings to preserve data-driven approach within time constraints.
+ * This script uses complete test scripts (Hamlet, Wasabi, Shoes etc.) with cross-domain off-script samples
+ * to test against false positives, then tunes on real OpenAI embeddings to preserve data-driven approach.
  *
  * Run: OPENAI_API_KEY=... npx tsx lib/semantic-tuning.ts
  */
 
+import * as fs from "fs"
+import * as path from "path"
 import { cosineSimilarity } from "./similarity"
 
 export interface TestCase {
   speech: string
   expectedAnchorIndex: number
   label: string
+}
+
+export interface ScriptTestData {
+  name: string
+  anchors: string[]
+  testCases: TestCase[]
 }
 
 export interface TuningResult {
@@ -40,121 +48,27 @@ export interface TuningResult {
 }
 
 /**
- * Create test suite: Hamlet script + diverse test cases
- * Focus: paraphrases should match, off-script should NOT match
+ * Load test script JSON files from lib/test-scripts/
  */
-function generateTestCases(): {
-  anchors: string[]
-  testCases: TestCase[]
-} {
-  const anchors = [
-    "To be or not to be that is the question",
-    "Whether tis nobler in the mind to suffer",
-    "The slings and arrows of outrageous fortune",
-    "Or to take arms against a sea of troubles",
-    "And by opposing end them To die to sleep",
-    "No more and by a sleep to say we end",
-    "The heart ache and the thousand natural shocks",
-    "That flesh is heir to tis a consummation",
-    "Devoutly to be wishd To die to sleep",
-    "To sleep perchance to dream ay theres the rub",
-  ]
+function loadTestScripts(): ScriptTestData[] {
+  const testScriptsDir = path.join(__dirname, "test-scripts")
+  const scripts: ScriptTestData[] = []
 
-  const testCases: TestCase[] = []
+  const files = ["hamlet.json", "wasabi.json", "shoes.json"]
 
-  // === POSITIVE CASES (should match their anchor) ===
+  for (const file of files) {
+    const filePath = path.join(testScriptsDir, file)
+    const content = fs.readFileSync(filePath, "utf-8")
+    const data = JSON.parse(content)
 
-  // Exact reads
-  testCases.push({
-    speech: "To be or not to be that is the question",
-    expectedAnchorIndex: 0,
-    label: "exact",
-  })
-  testCases.push({
-    speech: "Whether tis nobler in the mind to suffer",
-    expectedAnchorIndex: 1,
-    label: "exact",
-  })
-  testCases.push({
-    speech: "Or to take arms against a sea of troubles",
-    expectedAnchorIndex: 3,
-    label: "exact",
-  })
-  testCases.push({
-    speech: "To sleep perchance to dream ay theres the rub",
-    expectedAnchorIndex: 9,
-    label: "exact",
-  })
+    scripts.push({
+      name: data.name,
+      anchors: data.anchors,
+      testCases: data.testCases,
+    })
+  }
 
-  // Paraphrases (reader's interpretation - should still match correct anchor)
-  testCases.push({
-    speech: "The question of whether to exist or not exist",
-    expectedAnchorIndex: 0,
-    label: "paraphrase",
-  })
-  testCases.push({
-    speech: "Is it nobler to endure mental suffering in silence",
-    expectedAnchorIndex: 1,
-    label: "paraphrase",
-  })
-  testCases.push({
-    speech: "Life's cruel hardships and misfortunes",
-    expectedAnchorIndex: 2,
-    label: "paraphrase",
-  })
-  testCases.push({
-    speech: "Take up arms against troubles and overcome them by fighting",
-    expectedAnchorIndex: 3,
-    label: "paraphrase",
-  })
-  testCases.push({
-    speech: "Rest eternally perhaps with dreams that is the hesitation",
-    expectedAnchorIndex: 9,
-    label: "paraphrase",
-  })
-
-  // Minor ASR errors / variations
-  testCases.push({
-    speech: "To be or not to be that is the question",
-    expectedAnchorIndex: 0,
-    label: "asr-variation",
-  })
-  testCases.push({
-    speech: "Whether it is nobler in the mind to suffer",
-    expectedAnchorIndex: 1,
-    label: "asr-variation",
-  })
-
-  // === NEGATIVE CASES (should NOT match anything - false positives are bad!) ===
-
-  // Completely off-script
-  testCases.push({
-    speech: "The quick brown fox jumps over the lazy dog",
-    expectedAnchorIndex: -1,
-    label: "off-script",
-  })
-  testCases.push({
-    speech: "I am reading from a different book entirely",
-    expectedAnchorIndex: -1,
-    label: "off-script",
-  })
-  testCases.push({
-    speech: "Hello world this is a test message",
-    expectedAnchorIndex: -1,
-    label: "off-script",
-  })
-  testCases.push({
-    speech: "The weather today is quite nice and sunny",
-    expectedAnchorIndex: -1,
-    label: "off-script",
-  })
-  testCases.push({
-    speech: "Machine learning and artificial intelligence",
-    expectedAnchorIndex: -1,
-    label: "off-script",
-  })
-
-  return { anchors, testCases }
+  return scripts
 }
 
 async function semanticTuning(): Promise<TuningResult> {
@@ -167,20 +81,29 @@ async function semanticTuning(): Promise<TuningResult> {
     process.exit(1)
   }
 
-  const { anchors, testCases } = generateTestCases()
+  const scripts = loadTestScripts()
 
-  console.log("\nSemantic Parameter Tuning")
+  console.log("\nSemantic Parameter Tuning (Cross-Domain)")
   console.log("=".repeat(70))
-  console.log(`Script: Hamlet (${anchors.length} anchors)`)
+  console.log(`Scripts loaded: ${scripts.map((s) => s.name).join(", ")}`)
+  let totalTestCases = 0
+  for (const script of scripts) {
+    totalTestCases += script.testCases.length
+  }
   console.log(
-    `Test cases: ${testCases.length} (exact, paraphrases, off-script)`
+    `Total test cases: ${totalTestCases} (exact, paraphrases, cross-domain off-script)`
   )
   console.log("Goal: Maximize paraphrase matches, minimize false positives")
   console.log("=".repeat(70))
   console.log()
 
-  // Embed all anchors
+  // Embed all anchors from all scripts
   console.log("Embedding script anchors...")
+  const allAnchors: { script: string; anchors: string[] }[] = []
+  for (const script of scripts) {
+    allAnchors.push({ script: script.name, anchors: script.anchors })
+  }
+
   const anchorsRes = await fetch("https://api.openai.com/v1/embeddings", {
     method: "POST",
     headers: {
@@ -188,7 +111,7 @@ async function semanticTuning(): Promise<TuningResult> {
       Authorization: `Bearer ${openaiKey}`,
     },
     body: JSON.stringify({
-      input: anchors,
+      input: scripts.flatMap((s) => s.anchors),
       model: "text-embedding-3-small",
     }),
   })
@@ -199,13 +122,21 @@ async function semanticTuning(): Promise<TuningResult> {
   }
 
   const anchorsData = await anchorsRes.json()
-  const anchorEmbeddings = anchorsData.data
+  const allAnchorEmbeddings = anchorsData.data
     .sort((a: any, b: any) => a.index - b.index)
     .map((item: any) => item.embedding)
 
-  // Embed all test cases
+  // Embed all test cases from all scripts
   console.log("Embedding test cases...")
-  const speechTexts = testCases.map((tc) => tc.speech)
+  const allTestCases: { script: string; test: TestCase; embedding?: number[] }[] =
+    []
+  for (const script of scripts) {
+    for (const testCase of script.testCases) {
+      allTestCases.push({ script: script.name, test: testCase })
+    }
+  }
+
+  const speechTexts = allTestCases.map((tc) => tc.test.speech)
   const speechRes = await fetch("https://api.openai.com/v1/embeddings", {
     method: "POST",
     headers: {
@@ -224,9 +155,13 @@ async function semanticTuning(): Promise<TuningResult> {
   }
 
   const speechData = await speechRes.json()
-  const speechEmbeddings = speechData.data
+  const allSpeechEmbeddings = speechData.data
     .sort((a: any, b: any) => a.index - b.index)
     .map((item: any) => item.embedding)
+
+  for (let i = 0; i < allTestCases.length; i++) {
+    allTestCases[i].embedding = allSpeechEmbeddings[i]
+  }
 
   console.log()
   console.log("Grid search (penalizing false positives heavily)...")
@@ -241,9 +176,15 @@ async function semanticTuning(): Promise<TuningResult> {
     let falsePositives = 0
     let falseNegatives = 0
 
-    for (let speechIdx = 0; speechIdx < testCases.length; speechIdx++) {
-      const testCase = testCases[speechIdx]
-      const speechEmbedding = speechEmbeddings[speechIdx]
+    // Test each test case against the correct script's anchors
+    for (const testEntry of allTestCases) {
+      const testCase = testEntry.test
+      const scriptName = testEntry.script
+      const speechEmbedding = testEntry.embedding!
+
+      // Find the anchors for this script
+      const script = scripts.find((s) => s.name === scriptName)!
+      const anchors = script.anchors
 
       // Find best match in window
       let bestMatchIndex = -1
@@ -252,11 +193,16 @@ async function semanticTuning(): Promise<TuningResult> {
       const windowStart = Math.max(0, testCase.expectedAnchorIndex - 1)
       const windowEnd = Math.min(anchors.length, windowStart + 3)
 
+      // Calculate offset to find correct embeddings
+      let anchorOffset = 0
+      for (const s of scripts) {
+        if (s.name === scriptName) break
+        anchorOffset += s.anchors.length
+      }
+
       for (let anchorIdx = windowStart; anchorIdx < windowEnd; anchorIdx++) {
-        const score = cosineSimilarity(
-          speechEmbedding,
-          anchorEmbeddings[anchorIdx]
-        )
+        const embeddingIdx = anchorOffset + anchorIdx
+        const score = cosineSimilarity(speechEmbedding, allAnchorEmbeddings[embeddingIdx])
         if (score > bestScore) {
           bestScore = score
           bestMatchIndex = anchorIdx
@@ -284,7 +230,7 @@ async function semanticTuning(): Promise<TuningResult> {
       }
     }
 
-    const accuracy = correctMatches / testCases.length
+    const accuracy = correctMatches / allTestCases.length
     // Heavy penalty for false positives (they're worse than false negatives)
     const score = accuracy - falsePositives * 0.5
     const result: TuningResult = {
@@ -311,13 +257,71 @@ async function semanticTuning(): Promise<TuningResult> {
     )
   }
 
+  // Debug: Show which test cases fail for best threshold
+  console.log()
+  console.log("=".repeat(70))
+  console.log("FAILURE ANALYSIS FOR BEST THRESHOLD")
+  console.log("=".repeat(70))
+  const bestThreshold = bestResult!.semanticThreshold
+  for (const testEntry of allTestCases) {
+    const testCase = testEntry.test
+    const scriptName = testEntry.script
+    const speechEmbedding = testEntry.embedding!
+
+    const script = scripts.find((s) => s.name === scriptName)!
+    const anchors = script.anchors
+
+    let bestMatchIndex = -1
+    let bestScore = 0
+
+    const windowStart = Math.max(0, testCase.expectedAnchorIndex - 1)
+    const windowEnd = Math.min(anchors.length, windowStart + 3)
+
+    let anchorOffset = 0
+    for (const s of scripts) {
+      if (s.name === scriptName) break
+      anchorOffset += s.anchors.length
+    }
+
+    for (let anchorIdx = windowStart; anchorIdx < windowEnd; anchorIdx++) {
+      const embeddingIdx = anchorOffset + anchorIdx
+      const score = cosineSimilarity(speechEmbedding, allAnchorEmbeddings[embeddingIdx])
+      if (score > bestScore) {
+        bestScore = score
+        bestMatchIndex = anchorIdx
+      }
+    }
+
+    const matched = bestScore >= bestThreshold ? bestMatchIndex : -1
+
+    let failureType = ""
+    if (testCase.expectedAnchorIndex === -1) {
+      if (matched !== -1) {
+        failureType = "FALSE POSITIVE"
+      }
+    } else {
+      if (matched !== testCase.expectedAnchorIndex) {
+        failureType = matched === -1 ? "FALSE NEGATIVE" : "WRONG ANCHOR"
+      }
+    }
+
+    if (failureType) {
+      console.log(
+        `   ${failureType}: "${testCase.speech.substring(0, 50)}..." ` +
+          `(${scriptName}, ${testCase.label}, expected=${testCase.expectedAnchorIndex}, matched=${matched}, score=${bestScore.toFixed(3)})`
+      )
+    }
+  }
+
   console.log()
   console.log("=".repeat(70))
   console.log("TUNING COMPLETE")
   console.log("=".repeat(70))
   console.log()
   console.log(`Best Parameters (zero false positives preferred):`)
-  console.log(`   Semantic Threshold: ${bestResult!.semanticThreshold.toFixed(2)}`)
+  console.log(
+    `   Semantic Threshold: ${bestResult!.semanticThreshold.toFixed(2)}`
+  )
   console.log(`   Accuracy: ${(bestResult!.accuracy * 100).toFixed(1)}%`)
   console.log(`   False Positives: ${bestResult!.falsePositives}`)
   console.log(`   False Negatives: ${bestResult!.falseNegatives}`)

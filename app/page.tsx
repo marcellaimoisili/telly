@@ -85,7 +85,7 @@ export default function Home() {
       anchorEmbeddingsRef.current,
       semanticWindowStart,
       3,
-      0.25
+      0.50
     )
 
     if (match.index !== -1) {

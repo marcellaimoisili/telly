@@ -1,0 +1,69 @@
+{
+  "name": "Why I Love Shoes",
+  "anchors": [
+    "Why I love shoes",
+    "Shoes are the foundation",
+    "of any outfit They",
+    "complete your look and",
+    "express your personal style",
+    "I have always been",
+    "fascinated by footwear From",
+    "sneakers to heels to",
+    "boots I appreciate them",
+    "all Comfortable shoes make",
+    "a huge difference in",
+    "your day When your",
+    "feet are happy you",
+    "are happy I spend",
+    "hours browsing shoe stores",
+    "looking for that perfect",
+    "pair The right shoes",
+    "can transform an entire",
+    "outfit From casual to",
+    "formal from day to",
+    "night shoes are essential",
+    "I love the craftsmanship",
+    "that goes into making",
+    "quality footwear Every stitch",
+    "every material choice matters",
+    "Designers put so much",
+    "thought into their creations",
+    "and I respect that",
+    "dedication to excellence Shoes",
+    "tell a story about",
+    "who you are and",
+    "where you have been"
+  ],
+  "testCases": [
+    {
+      "speech": "Why I love shoes is a mystery",
+      "expectedAnchorIndex": 0,
+      "label": "exact"
+    },
+    {
+      "speech": "Shoes are the foundation of any outfit",
+      "expectedAnchorIndex": 1,
+      "label": "exact"
+    },
+    {
+      "speech": "Comfortable shoes make a huge difference",
+      "expectedAnchorIndex": 9,
+      "label": "exact"
+    },
+    {
+      "speech": "Footwear is very important to me personally",
+      "expectedAnchorIndex": 0,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "Good footwear makes your day better",
+      "expectedAnchorIndex": 9,
+      "label": "paraphrase"
+    },
+    {
+      "speech": "I eat sushi just like everybody else",
+      "expectedAnchorIndex": -1,
+      "label": "off-script-wasabi"
+    }
+  ]
+}
