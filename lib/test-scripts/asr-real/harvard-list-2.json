@@ -1,0 +1,94 @@
+{
+  "name": "Harvard Sentences list-2",
+  "source": "Open Speech Repository (voiptroubleshooter.com), Deepgram Nova-2 transcription",
+  "anchors": [
+    "The boy was there when",
+    "the sun rose A rod",
+    "is used to catch pink",
+    "salmon The source of the",
+    "huge river is the clear",
+    "spring Kick the ball straight",
+    "and follow through Help the",
+    "woman get back to her",
+    "feet A pot of tea",
+    "helps to pass the evening",
+    "Smoky fires lack flame and",
+    "heat The soft cushion broke",
+    "the mans fall The salt",
+    "breeze came across from the",
+    "sea The girl at the",
+    "booth sold fifty bonds"
+  ],
+  "testCases": [
+    {
+      "speech": "the boy was there when the sun rose",
+      "expectedAnchorIndex": 0,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "a rod is used to catch pink salmon",
+      "expectedAnchorIndex": 2,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the source of the huge river is the clear spring",
+      "expectedAnchorIndex": 4,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "kick the ball straight and follow through",
+      "expectedAnchorIndex": 5,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "helped the woman get back to her feet",
+      "expectedAnchorIndex": 7,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the pot of tea helps to pass the evening",
+      "expectedAnchorIndex": 9,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "smokey fires lack flame and heat",
+      "expectedAnchorIndex": 10,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the soft cushion broke the man's fall",
+      "expectedAnchorIndex": 11,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the salt breeze came across the sea",
+      "expectedAnchorIndex": 13,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the girl at the booth sold fifty bonds",
+      "expectedAnchorIndex": 14,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the birch canoe slid on the smooth planks",
+      "expectedAnchorIndex": -1,
+      "label": "off-script-cross-list"
+    },
+    {
+      "speech": "the juice of lemons makes fine punch",
+      "expectedAnchorIndex": -1,
+      "label": "off-script-cross-list"
+    },
+    {
+      "speech": "the small pup nod a hole in the sock",
+      "expectedAnchorIndex": -1,
+      "label": "off-script-cross-list"
+    },
+    {
+      "speech": "two blue fish swam in the tank",
+      "expectedAnchorIndex": -1,
+      "label": "off-script-cross-list"
+    }
+  ]
+}

@@ -54,6 +54,7 @@ function loadTestScripts(): ScriptTestData[] {
   const dirs = [
     path.join(__dirname, "test-scripts", "real-world"),
     path.join(__dirname, "test-scripts", "asr-noisy"),
+    path.join(__dirname, "test-scripts", "asr-real"),
   ]
   const scripts: ScriptTestData[] = []
 

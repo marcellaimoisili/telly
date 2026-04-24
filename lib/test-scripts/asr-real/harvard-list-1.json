@@ -1,0 +1,94 @@
+{
+  "name": "Harvard Sentences list-1",
+  "source": "Open Speech Repository (voiptroubleshooter.com), Deepgram Nova-2 transcription",
+  "anchors": [
+    "The birch canoe slid on",
+    "the smooth planks Glue the",
+    "sheet to the dark blue",
+    "background Its easy to tell",
+    "the depth of a well",
+    "These days a chicken leg",
+    "is a rare dish Rice",
+    "is often served in round",
+    "bowls The juice of lemons",
+    "makes fine punch The box",
+    "was thrown beside the parked",
+    "truck The hogs were fed",
+    "chopped corn and garbage Four",
+    "hours of steady work faced",
+    "us A large size in",
+    "stockings is hard to sell"
+  ],
+  "testCases": [
+    {
+      "speech": "the birch canoe slid on the smooth planks",
+      "expectedAnchorIndex": 0,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "glue the sheet to the dark blue background",
+      "expectedAnchorIndex": 2,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "it is easy to tell the depth of a well",
+      "expectedAnchorIndex": 4,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "these days a chicken leg is a rare dish",
+      "expectedAnchorIndex": 5,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "rice is often served in round bowls",
+      "expectedAnchorIndex": 7,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the juice of lemons makes fine punch",
+      "expectedAnchorIndex": 8,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the box was thrown beside the park truck",
+      "expectedAnchorIndex": 10,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the hogs were fed chopped corn and garbage",
+      "expectedAnchorIndex": 11,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "four hours of steady work faced us",
+      "expectedAnchorIndex": 13,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "a large size in stockings is hard to sell",
+      "expectedAnchorIndex": 15,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the boy was there when the sun rose",
+      "expectedAnchorIndex": -1,
+      "label": "off-script-cross-list"
+    },
+    {
+      "speech": "the pot of tea helps to pass the evening",
+      "expectedAnchorIndex": -1,
+      "label": "off-script-cross-list"
+    },
+    {
+      "speech": "the small pup nod a hole in the sock",
+      "expectedAnchorIndex": -1,
+      "label": "off-script-cross-list"
+    },
+    {
+      "speech": "two blue fish swam in the tank",
+      "expectedAnchorIndex": -1,
+      "label": "off-script-cross-list"
+    }
+  ]
+}

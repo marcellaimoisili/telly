@@ -1,0 +1,95 @@
+{
+  "name": "Harvard Sentences list-3",
+  "source": "Open Speech Repository (voiptroubleshooter.com), Deepgram Nova-2 transcription",
+  "anchors": [
+    "The small pup gnawed a",
+    "hole in the sock The",
+    "fish twisted and turned on",
+    "the bent hook Press the",
+    "pants and sew a button",
+    "on the vest The swan",
+    "dive was far short of",
+    "perfect The beauty of the",
+    "view stunned the young boy",
+    "Two blue fish swam in",
+    "the tank Her purse was",
+    "full of useless trash The",
+    "colt reared and threw the",
+    "tall rider It snowed rained",
+    "and hailed the same morning",
+    "Read verse out loud for",
+    "pleasure"
+  ],
+  "testCases": [
+    {
+      "speech": "the small pup nod a hole in the sock",
+      "expectedAnchorIndex": 0,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the fish twisted and turned on the bent hook",
+      "expectedAnchorIndex": 2,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "press the pants and sew a button on the vest",
+      "expectedAnchorIndex": 4,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the swan dive was far short of perfect",
+      "expectedAnchorIndex": 6,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the beauty of the view stunned the young boy",
+      "expectedAnchorIndex": 8,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "two blue fish swam in the tank",
+      "expectedAnchorIndex": 9,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "her purse was full of useless",
+      "expectedAnchorIndex": 10,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "trash the colt reared and threw the tall rider",
+      "expectedAnchorIndex": 12,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "it snowed rain and hail the same morning",
+      "expectedAnchorIndex": 14,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "read verse out loud for pleasure",
+      "expectedAnchorIndex": 15,
+      "label": "real-asr-deepgram"
+    },
+    {
+      "speech": "the birch canoe slid on the smooth planks",
+      "expectedAnchorIndex": -1,
+      "label": "off-script-cross-list"
+    },
+    {
+      "speech": "the juice of lemons makes fine punch",
+      "expectedAnchorIndex": -1,
+      "label": "off-script-cross-list"
+    },
+    {
+      "speech": "the boy was there when the sun rose",
+      "expectedAnchorIndex": -1,
+      "label": "off-script-cross-list"
+    },
+    {
+      "speech": "the pot of tea helps to pass the evening",
+      "expectedAnchorIndex": -1,
+      "label": "off-script-cross-list"
+    }
+  ]
+}
