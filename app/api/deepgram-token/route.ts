@@ -33,4 +33,3 @@ export async function GET(req: Request) {
     key: keyResponse.key,
   })
 }
-
